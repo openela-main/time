@@ -1,7 +1,7 @@
 Summary:    A GNU utility for monitoring a program's use of system resources
 Name:       time
 Version:    1.9
-Release:    18%{?dist}
+Release:    19%{?dist}
 # src/time.c:               GPLv3+
 # COPYING:                  GPLv3 text
 # doc/time.texi:            GFDL
@@ -56,6 +56,10 @@ Patch2:     time-1.9-Use-kibibytes-instead-of-kilobytes-in-a-documentatio.patch
 # proposed to an upstream,
 # <https://lists.gnu.org/archive/html/bug-time/2020-11/msg00001.html>
 Patch3:     time-1.9-Close-outfp-before-exec.patch
+# The time-max-rss.sh test randomly fails (mallocating 5 MB more does not have
+# to increase RSS in 5 MB). In addition there is regression in ppc64le kernel
+# (bug #2212765) which always fails.
+Patch4:     time-1.9-drop-flawed-rss-test.patch
 BuildRequires:  autoconf
 BuildRequires:  automake
 BuildRequires:  bash
@@ -80,6 +84,7 @@ the results.
 # Set time stamp stored in an info page to the latest patch
 touch -d "$(sed -n -e '/^Date: /{s/^[^:]*: //;p}' %{PATCH2})" doc/time.texi
 %patch3 -p1
+%patch4 -p1
 # Correct version VERSION flag for doc/time.texi
 # <https://lists.gnu.org/archive/html/bug-time/2021-01/msg00000.html>
 printf '%{version}\n' > .tarball-version
@@ -105,6 +110,10 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 # time(1) manual page lives in man-pages package, bug #1612294.
 
 %changelog
+* Wed Jul 08 2026 Ondrej Pohorelsky <opohorel@redhat.com> - 1.9-19
+- Drop flawed time-max-rss.sh test
+- Resolves: RHEL-192225
+
 * Tue Aug 10 2021 Mohan Boddu <mboddu@redhat.com> - 1.9-18
 - Rebuilt for IMA sigs, glibc 2.34, aarch64 flags
   Related: rhbz#1991688
